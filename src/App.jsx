@@ -4,30 +4,26 @@ import './App.css';
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [books, setBooks] = useState({ items: [] });
   const onInputChange = e => {
     setSearchTerm(e.target.value);
   };
+  const [error, setError] = useState(false);
+  const [loading, setloading] = useState(false);
 
   let API_URL = `https://www.googleapis.com/books/v1/volumes?q=<searchTerm>
 `;
 
-  const [books, setBooks] = useState({ items: [] });
-
-  let authors = ['Param', 'Vennila', 'Afrin'];
-
-  const bookAuthors = authors => {
-    if (authors.length <= 2) {
-      authors = authors.join(' and ');
-    } else if (authors.length > 2) {
-      let LastAuthor = ' and ' + authors.slice(-1);
-      authors.pop();
-      authors = authors.join(', ');
-      authors += LastAuthor;
-    }
-    return authors;
-  };
-
   const fetchBooks = async () => {
+    setloading(true);
+    setError(false);
+    try {
+      const result = await axios.get(`${API_URL}?q=${searchTerm}`);
+      setBooks(result.data);
+    } catch (error) {
+      setError(true);
+      setloading(true);
+    }
     // ajax api using axios
     const result = await axios.get(`${API_URL}?q=${searchTerm}`);
     setBooks(result.data);
@@ -42,6 +38,19 @@ const App = () => {
     // call function
     fetchBooks();
   };
+
+  const bookAuthors = authors => {
+    if (authors.length <= 2) {
+      authors = authors.join(' and ');
+    } else if (authors.length > 2) {
+      let lastAuthor = ' and ' + authors.slice(-1);
+      authors.pop();
+      authors = authors.join(', ');
+      authors += lastAuthor;
+    }
+    return authors;
+  };
+
   return (
     <section>
       <form onSubmit={onSubmitHandler}>
@@ -52,10 +61,19 @@ const App = () => {
             placeholder='something something'
             value={searchTerm}
             onChange={onInputChange}
+            required
           />
           <button type='submt'>Search</button>
         </label>
+        {error && (
+          <div style={{ color: `red` }}>error occurred while fetching api</div>
+        )}
       </form>
+      {loading && (
+        <div style={{ color: `green` }}>
+          fetching books for "<strong>{searchTerm}</strong>"
+        </div>
+      )}
       <ul>
         {books.items.map((book, index) => {
           return (
