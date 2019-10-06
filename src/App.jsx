@@ -13,6 +13,20 @@ const App = () => {
 
   const [books, setBooks] = useState({ items: [] });
 
+  let authors = ['Param', 'Vennila', 'Afrin'];
+
+  const bookAuthors = authors => {
+    if (authors.length <= 2) {
+      authors = authors.join(' and ');
+    } else if (authors.length > 2) {
+      let LastAuthor = ' and ' + authors.slice(-1);
+      authors.pop();
+      authors = authors.join(', ');
+      authors += LastAuthor;
+    }
+    return authors;
+  };
+
   const fetchBooks = async () => {
     // ajax api using axios
     const result = await axios.get(`${API_URL}?q=${searchTerm}`);
@@ -53,6 +67,7 @@ const App = () => {
                 />
                 <div>
                   <h3>{book.volumeInfo.tite}</h3>
+                  <p>{bookAuthors(books.volumeInfo.authors)}</p>
                   <p>{book.volumeInfo.publishedDate}</p>
                 </div>
               </div>
